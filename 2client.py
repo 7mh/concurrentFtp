@@ -14,7 +14,7 @@ allfiles = os.listdir()
 filesize = [os.stat(i).st_size for i in allfiles]
 filehash = md5()
 
-SERVER = "127.0.0.1"                 #SELECT HOME ADDR or GET MACHINE IP
+SERVER = "cs.indstate.edu"                 #SELECT HOME ADDR or GET MACHINE IP
 #SERVER = socket.gethostbyaddr(socket.gethostname())[2][0]
 
 PORT = 8089
@@ -27,6 +27,7 @@ HEADERSIZE =  SIZEl+NAMEl+CHECKSUMl+EXTRAl
 #HEADERSIZE = 20 + 255 + 200     #20:filesize, 255:name, 32:CSum 168:EXTRA
 PACKETSIZE = 128* filehash.block_size   #coz md5 has 128*64 digest blks
 client = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+client.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)    #UNDO Maybe
 client.connect((SERVER, PORT))
 #client.sendall(bytes("This is from Client",'UTF-8'))
 print(os.getcwd())

@@ -8,7 +8,7 @@ from md5sum import md5sum
 import pdb
 
 
-LOCALHOST = "127.0.0.1"
+LOCALHOST = socket.gethostname()  #"127.0.0.1"
 #LOCALHOST = socket.gethostbyaddr(socket.gethostname())[2][0]
 PORT = 8089
 #HEADERSIZE = 20
