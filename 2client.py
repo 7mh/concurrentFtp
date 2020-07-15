@@ -88,8 +88,8 @@ if __name__ == '__main__':
     print(f"number of files to read {len(allfiles)}")
     #client.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)    #UNDO Maybe
     client = 1
-    allfiles.pop(2)
-    filesize.pop(2)
+    #allfiles.pop(2)
+    #filesize.pop(2)
     #i = 2
     for i in range(len(allfiles)):
     #while True:

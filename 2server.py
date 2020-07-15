@@ -29,7 +29,6 @@ os.chdir(SOURCEPATH)
 CONCCUR = 1
 table = [{} for i in range(150)]
 byteRecv = [0 for i in range(150)]
-qEmptySpotcount = 3*CONCCUR
 
 class ClientThread(threading.Thread):
     def __init__(self,clientAddress,clientsocket, num):
@@ -48,19 +47,37 @@ class ClientThread(threading.Thread):
         data = self.csocket.recv(PACKETSIZE)
         msg = data.decode()
         HEADER = msg[:HEADERSIZE]
-        print(f"HEADER !!! : {HEADER}")
+        #print(f"HEADER !!! : {HEADER}")
         filesize = int(HEADER[:SIZEl])
-        filename = HEADER[SIZEl: (SIZEl+NAMEl)]
+        filename = HEADER[SIZEl: (SIZEl+NAMEl)].rstrip()
         filechksum = HEADER[(SIZEl+NAMEl):(SIZEl+NAMEl+CHECKSUMl)]
-        fileblock = HEADER[(SIZEl+NAMEl+CHECKSUMl):(SIZEl+NAMEl+CHECKSUMl+FILEBLOCKl)]
+        fileblock = HEADER[(SIZEl+NAMEl+CHECKSUMl):(SIZEl+NAMEl+CHECKSUMl+FILEBLOCKl)].rstrip()
         currfile = HEADER[(SIZEl+NAMEl+CHECKSUMl+FILEBLOCKl):(SIZEl+NAMEl+CHECKSUMl+FILEBLOCKl+CURRl)]
         totalfiles = HEADER[(SIZEl+NAMEl+CHECKSUMl+FILEBLOCKl+CURRl):(SIZEl+NAMEl+CHECKSUMl+FILEBLOCKl+CURRl+TOTALl)]
-        clientThrdId = HEADER[(SIZEl+NAMEl+CHECKSUMl+FILEBLOCKl+CURRl+TOTALl):(SIZEl+NAMEl+CHECKSUMl+FILEBLOCKl+CURRl+TOTALl+TIDl)]
-        print(f"new file size {filesize}, {filename},fileblock: {fileblock}, {filechksum}, currfile:{currfile}, tot:{totalfiles}")
-        byteRecv[int(currfile)] += len(msg) - HEADERSIZE
-        table[int(currfile)][fileblock] = msg[HEADERSIZE:]
-        print(msg[-40:])
-        self.csocket.send(bytes(str(clientThrdId),'UTF-8'))
+        clientThrdId = HEADER[(SIZEl+NAMEl+CHECKSUMl+FILEBLOCKl+CURRl+TOTALl):(SIZEl+NAMEl+CHECKSUMl+FILEBLOCKl+CURRl+TOTALl+TIDl)].rstrip()
+        print(f"> file size {filesize}, {filename},fileblock: {fileblock}, {filechksum}, currfile:{currfile}, tot:{totalfiles}, tid:{clientThrdId}")
+        currfile = int(currfile)
+        byteRecv[currfile] += len(msg) - HEADERSIZE
+        table[currfile][fileblock] = msg[HEADERSIZE:]
+        print(f"- {byteRecv[currfile]} of {filesize}",msg[-40:])
+
+        if byteRecv[currfile] == filesize:
+            #try:
+            with open(filename, 'a+') as fd:
+                    for i in range(1,int(fileblock)+1):
+                        fd.write(table[currfile][str(i)])
+            #except:
+            #    print("ERROR writing file on disk")
+            chkSum = md5sum(filename)
+            if filechksum == chkSum:
+                print(filename, ">>>>>>>>>>>>>>>> CHECKSUM PASSED !")
+                table[currfile].clear()
+            else:
+                print(filename, ">>>>>>>>>>>>>>CHECKSUM failED !")
+        self.csocket.send(bytes(clientThrdId,'UTF-8'))
+
+
+
         #fd.write(msg[HEADERSIZE:])
         #try:
         #    fd = open(self.filenum, 'a+')
@@ -94,13 +111,6 @@ class ClientThread(threading.Thread):
         #fd.close()
         filename = filename.rstrip()
         os.rename(self.filenum, filename)
-        chkSum = md5sum(filename)
-        #print(chkSum, filechksum == chkSum)
-        #pdb.set_trace()
-        if filechksum == chkSum:
-            print(filename, "CHECKSUM PASSED !")
-        else:
-            print(filename, "CHECKSUM failED !")
         '''
 
 if __name__ == "__main__":
@@ -111,9 +121,8 @@ if __name__ == "__main__":
     print("Waiting for client request..")
     num = 1
     while True:
-        server.listen( 6 )
+        server.listen( 24 )
         clientsock, clientAddress = server.accept()
         newthread = ClientThread(clientAddress, clientsock,num)
         num += 1
-        qEmptySpotcount -= 1
         newthread.start()
