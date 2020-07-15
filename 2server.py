@@ -27,8 +27,8 @@ PACKETSIZE = 128* filehash.block_size   #coz md5 has 128*64 digest blks
 SOURCEPATH = "/u1/h3/hashmi/public_html/dest"
 os.chdir(SOURCEPATH)
 CONCCUR = 1
-table = [{} for i in range(150)]
-#table = [0 for i in range(150)]
+#table = [{} for i in range(150)]
+table = [[] for i in range(150)]
 byteRecv = [0 for i in range(150)]
 
 CsumPassed = 0
@@ -63,14 +63,16 @@ class ClientThread(threading.Thread):
         #print(f"> file size {filesize}, {filename},fileblock: {fileblock}, {filechksum}, currfile:{currfile}, tot:{totalfiles}, tid:{clientThrdId}")
         currfile = int(currfile)
         byteRecv[currfile] += len(msg) - HEADERSIZE
-        table[currfile][fileblock] = msg[HEADERSIZE:]
+
+        #table[currfile][fileblock] = msg[HEADERSIZE:]
+        table[currfile].append(msg[HEADERSIZE:])
         #print(f"- {byteRecv[currfile]} of {filesize}",msg[-40:])
 
         if byteRecv[currfile] == filesize:
             #try:
             with open(filename, 'a+') as fd:
-                    for i in range(1,int(fileblock)+1):
-                        fd.write(table[currfile][str(i)])
+                    for i in range(len(table[currfile])):
+                        fd.write(table[currfile][i])
             #except:
             #    print("ERROR writing file on disk")
             chkSum = md5sum(filename)
