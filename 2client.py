@@ -39,11 +39,11 @@ DATASIZE = PACKETSIZE - HEADERSIZE
 qSize = 0
 
 class Transfer(threading.Thread):
-    def __init__(self, serverAddr, seversocket, Name, Size, Id, fid, totalf):
+    def __init__(self, Name, Size, Id, fid, totalf):
         threading.Thread.__init__(self)
         self.fname = Name
         self.fsize = Size
-        self.Tid = Id
+        self.Tid = fid
         self.Fid = fid
         self.totalfiles = totalf
         print(f"Constructor end for t{self.Tid}")
@@ -86,16 +86,26 @@ class Transfer(threading.Thread):
 if __name__ == '__main__':
     print(os.getcwd())
     print(f"number of files to read {len(allfiles)}")
-    #client.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)    #UNDO Maybe
     client = 1
+    threadCount = int(sys.argv[1])
+    print(allfiles)
+
     #allfiles.pop(2)
     #filesize.pop(2)
-    #i = 2
-    for i in range(len(allfiles)):
-    #while True:
-        transferthread = Transfer(SERVER, client ,allfiles[i], filesize[i], 1,i, len(allfiles))
-        print(f"started thread {i}")
+    i = 0
+    j  = 0
+    #for i in range(len(allfiles)):
+    while i < len(allfiles):
+        if j >= threadCount:
+            j = 0
+        transferthread = Transfer(allfiles[i], filesize[i], j,i, len(allfiles))
         transferthread.start()
+        while True:
+            if threading.active_count() < threadCount +1 :
+                break
+        print(f"started thread {j} file {allfiles[i]}, thread count {threading.active_count()}")
+        i += 1
+        j += 1
 
         #input()
 

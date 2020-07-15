@@ -29,6 +29,8 @@ os.chdir(SOURCEPATH)
 CONCCUR = 1
 table = [{} for i in range(150)]
 byteRecv = [0 for i in range(150)]
+CsumPassed = 0
+CsumFailed = 0
 
 class ClientThread(threading.Thread):
     def __init__(self,clientAddress,clientsocket, num):
@@ -38,6 +40,7 @@ class ClientThread(threading.Thread):
         print ("New connection added: ", clientAddress)
 
     def run(self):
+        global CsumPassed, CsumFailed
         print ("Connection from : ", clientAddress)
         #self.csocket.send(bytes("Hi, This is from Server..",'utf-8'))
         msg = ''
@@ -72,8 +75,10 @@ class ClientThread(threading.Thread):
             if filechksum == chkSum:
                 print(filename, ">>>>>>>>>>>>>>>> CHECKSUM PASSED !")
                 table[currfile].clear()
+                CsumPassed += 1
             else:
                 print(filename, ">>>>>>>>>>>>>>CHECKSUM failED !")
+                CsumFailed += 1
         self.csocket.send(bytes(clientThrdId,'UTF-8'))
 
 
@@ -117,10 +122,11 @@ if __name__ == "__main__":
     server = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
     server.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
     server.bind((LOCALHOST, PORT))
-    print("Server started")
+    print("Server started at {LOCALHOST}")
     print("Waiting for client request..")
     num = 1
     while True:
+        print(f"Checksum pass: {CsumPassed}, fail: {CsumFailed}")
         server.listen( 24 )
         clientsock, clientAddress = server.accept()
         newthread = ClientThread(clientAddress, clientsock,num)
