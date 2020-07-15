@@ -90,22 +90,36 @@ if __name__ == '__main__':
     threadCount = int(sys.argv[1])
     print(allfiles)
 
+    transferthread = [0]*10
+
+    #allfiles.pop(0)
+    #filesize.pop(0)
     #allfiles.pop(2)
     #filesize.pop(2)
     i = 0
     j  = 0
-    #for i in range(len(allfiles)):
+
+    for i in range(len(allfiles)):
+        transferthread[i] = Transfer(allfiles[i], filesize[i], j,i, len(allfiles))
+        transferthread[i].start()
+        print(f"> started thread 4 file {allfiles[i]}, thread count {threading.active_count()}")  #also includes Parent thread
+
+    for i in range(len(allfiles)):
+        transferthread[i].join()
+
+    print("DONE !!!!")
+    '''
     while i < len(allfiles):
         if j >= threadCount:
             j = 0
         transferthread = Transfer(allfiles[i], filesize[i], j,i, len(allfiles))
         transferthread.start()
+
         while True:
             if threading.active_count() < threadCount +1 :
                 break
         print(f"started thread {j} file {allfiles[i]}, thread count {threading.active_count()}")
         i += 1
         j += 1
-
-        #input()
+    '''
 

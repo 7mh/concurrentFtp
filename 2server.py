@@ -28,7 +28,9 @@ SOURCEPATH = "/u1/h3/hashmi/public_html/dest"
 os.chdir(SOURCEPATH)
 CONCCUR = 1
 table = [{} for i in range(150)]
+#table = [0 for i in range(150)]
 byteRecv = [0 for i in range(150)]
+
 CsumPassed = 0
 CsumFailed = 0
 
@@ -37,11 +39,11 @@ class ClientThread(threading.Thread):
         threading.Thread.__init__(self)
         self.csocket = clientsocket
         self.filenum = str(num)
-        print ("New connection added: ", clientAddress)
+        #print ("New connection added: ", clientAddress)
 
     def run(self):
         global CsumPassed, CsumFailed
-        print ("Connection from : ", clientAddress)
+        #print ("Connection from : ", clientAddress)
         #self.csocket.send(bytes("Hi, This is from Server..",'utf-8'))
         msg = ''
         new_msg = True
@@ -58,11 +60,11 @@ class ClientThread(threading.Thread):
         currfile = HEADER[(SIZEl+NAMEl+CHECKSUMl+FILEBLOCKl):(SIZEl+NAMEl+CHECKSUMl+FILEBLOCKl+CURRl)]
         totalfiles = HEADER[(SIZEl+NAMEl+CHECKSUMl+FILEBLOCKl+CURRl):(SIZEl+NAMEl+CHECKSUMl+FILEBLOCKl+CURRl+TOTALl)]
         clientThrdId = HEADER[(SIZEl+NAMEl+CHECKSUMl+FILEBLOCKl+CURRl+TOTALl):(SIZEl+NAMEl+CHECKSUMl+FILEBLOCKl+CURRl+TOTALl+TIDl)].rstrip()
-        print(f"> file size {filesize}, {filename},fileblock: {fileblock}, {filechksum}, currfile:{currfile}, tot:{totalfiles}, tid:{clientThrdId}")
+        #print(f"> file size {filesize}, {filename},fileblock: {fileblock}, {filechksum}, currfile:{currfile}, tot:{totalfiles}, tid:{clientThrdId}")
         currfile = int(currfile)
         byteRecv[currfile] += len(msg) - HEADERSIZE
         table[currfile][fileblock] = msg[HEADERSIZE:]
-        print(f"- {byteRecv[currfile]} of {filesize}",msg[-40:])
+        #print(f"- {byteRecv[currfile]} of {filesize}",msg[-40:])
 
         if byteRecv[currfile] == filesize:
             #try:
@@ -73,11 +75,12 @@ class ClientThread(threading.Thread):
             #    print("ERROR writing file on disk")
             chkSum = md5sum(filename)
             if filechksum == chkSum:
+                print(f"> file size {filesize}, {filename},fileblock: {fileblock}, {filechksum}, currfile:{currfile}, tot:{totalfiles}, tid:{clientThrdId}")
                 print(filename, ">>>>>>>>>>>>>>>> CHECKSUM PASSED !")
-                table[currfile].clear()
+                #table[currfile].clear()
                 CsumPassed += 1
             else:
-                print(filename, ">>>>>>>>>>>>>>CHECKSUM failED !")
+                print(filename, ">>>>>>>>>CHECKSUM failED !")
                 CsumFailed += 1
         self.csocket.send(bytes(clientThrdId,'UTF-8'))
 
@@ -127,7 +130,7 @@ if __name__ == "__main__":
     num = 1
     while True:
         print(f"Checksum pass: {CsumPassed}, fail: {CsumFailed}")
-        server.listen( 24 )
+        server.listen( 25 )
         clientsock, clientAddress = server.accept()
         newthread = ClientThread(clientAddress, clientsock,num)
         num += 1
