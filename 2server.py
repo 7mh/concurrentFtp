@@ -12,17 +12,24 @@ LOCALHOST = socket.gethostname()  #"127.0.0.1"
 #LOCALHOST = socket.gethostbyaddr(socket.gethostname())[2][0]
 PORT = 8089
 #HEADERSIZE = 20
+###############################################################
 SIZEl = 20              #20:filesize, 50:name, 32:CSum 8:EXTRA
 NAMEl = 50
 CHECKSUMl = 32
-EXTRAl = 8
-HEADERSIZE =  SIZEl+NAMEl+CHECKSUMl+EXTRAl
+FILEBLOCKl = 8
+TIDl = 2
+CURRl = 3
+TOTALl = 3
+HEADERSIZE =  SIZEl+NAMEl+CHECKSUMl+FILEBLOCKl+CURRl+TOTALl+TIDl
+###############################################################
 filehash = md5()
 PACKETSIZE = 128* filehash.block_size   #coz md5 has 128*64 digest blks
 SOURCEPATH = "/u1/h3/hashmi/public_html/dest"
 os.chdir(SOURCEPATH)
 CONCCUR = 1
-table = [{} for i in range(CONCCUR)]
+table = [{} for i in range(150)]
+byteRecv = [0 for i in range(150)]
+qEmptySpotcount = 3*CONCCUR
 
 class ClientThread(threading.Thread):
     def __init__(self,clientAddress,clientsocket, num):
@@ -37,20 +44,34 @@ class ClientThread(threading.Thread):
         msg = ''
         new_msg = True
         count  = 1
-        byteRecv = 0
         filesize = 0
-        try:
-            fd = open(self.filenum, 'a+')
-        except:
-            print("ERROR OPENING FILE")
-
+        data = self.csocket.recv(PACKETSIZE)
+        msg = data.decode()
+        HEADER = msg[:HEADERSIZE]
+        print(f"HEADER !!! : {HEADER}")
+        filesize = int(HEADER[:SIZEl])
+        filename = HEADER[SIZEl: (SIZEl+NAMEl)]
+        filechksum = HEADER[(SIZEl+NAMEl):(SIZEl+NAMEl+CHECKSUMl)]
+        fileblock = HEADER[(SIZEl+NAMEl+CHECKSUMl):(SIZEl+NAMEl+CHECKSUMl+FILEBLOCKl)]
+        currfile = HEADER[(SIZEl+NAMEl+CHECKSUMl+FILEBLOCKl):(SIZEl+NAMEl+CHECKSUMl+FILEBLOCKl+CURRl)]
+        totalfiles = HEADER[(SIZEl+NAMEl+CHECKSUMl+FILEBLOCKl+CURRl):(SIZEl+NAMEl+CHECKSUMl+FILEBLOCKl+CURRl+TOTALl)]
+        clientThrdId = HEADER[(SIZEl+NAMEl+CHECKSUMl+FILEBLOCKl+CURRl+TOTALl):(SIZEl+NAMEl+CHECKSUMl+FILEBLOCKl+CURRl+TOTALl+TIDl)]
+        print(f"new file size {filesize}, {filename},fileblock: {fileblock}, {filechksum}, currfile:{currfile}, tot:{totalfiles}")
+        byteRecv[int(currfile)] += len(msg) - HEADERSIZE
+        table[int(currfile)][fileblock] = msg[HEADERSIZE:]
+        print(msg[-40:])
+        self.csocket.send(bytes(str(clientThrdId),'UTF-8'))
+        #fd.write(msg[HEADERSIZE:])
+        #try:
+        #    fd = open(self.filenum, 'a+')
+        #except:
+        #    print("ERROR OPENING FILE")
+        '''
         while True:
             #condition when a small file occupies only 1 Packet
             if byteRecv != 0 and filesize != 0 and byteRecv >= filesize:
                 break
 
-            data = self.csocket.recv(PACKETSIZE)
-            msg = data.decode()
 
 
             if new_msg == False:
@@ -63,24 +84,14 @@ class ClientThread(threading.Thread):
                     print("Transfer complete")
                     break
             if new_msg:
-                HEADER = msg[:HEADERSIZE]
-                print(f"HEADER : {HEADER}")
-                filesize = int(HEADER[:SIZEl])
-                filename = HEADER[SIZEl: (SIZEl+NAMEl)]
-                filechksum = HEADER[(SIZEl+NAMEl):(SIZEl+NAMEl+32)]
-
-                print(f"new file size {filesize}, {filename}, {filechksum}")
-                byteRecv = len(msg) - HEADERSIZE
-                fd.write(msg[HEADERSIZE:])
                 new_msg = False
             print (f"{count} read from client LEN:{len(msg)} RECV:{byteRecv}", msg[:40])
             count += 1
 
-            #self.csocket.send(bytes(msg,'UTF-8'))
 
         print ("Client at ", clientAddress , " disconnected...")
         #self.csocket.close()
-        fd.close()
+        #fd.close()
         filename = filename.rstrip()
         os.rename(self.filenum, filename)
         chkSum = md5sum(filename)
@@ -90,7 +101,7 @@ class ClientThread(threading.Thread):
             print(filename, "CHECKSUM PASSED !")
         else:
             print(filename, "CHECKSUM failED !")
-
+        '''
 
 if __name__ == "__main__":
     server = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
@@ -100,8 +111,9 @@ if __name__ == "__main__":
     print("Waiting for client request..")
     num = 1
     while True:
-        server.listen(1)
+        server.listen( 6 )
         clientsock, clientAddress = server.accept()
         newthread = ClientThread(clientAddress, clientsock,num)
         num += 1
+        qEmptySpotcount -= 1
         newthread.start()
