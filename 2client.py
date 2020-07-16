@@ -8,7 +8,8 @@ from hashlib import md5
 from utilit import *
 
 
-SOURCEPATH = "/u1/h3/hashmi/public_html/source"
+#SOURCEPATH = "/u1/h3/hashmi/public_html/source"
+SOURCEPATH = "/u1/h3/hashmi/public_html/sourceM"
 os.chdir(SOURCEPATH)
 CONCURR = 1     #sys.argv[1]
 
@@ -40,6 +41,18 @@ DATASIZE = PACKETSIZE - HEADERSIZE
 qSize = 0
 chunkByte = ''
 
+locktx = threading.Lock()
+lockrx = threading.Lock()
+
+def txMutex(sock, buff):
+    with locktx:
+        sock.sendall(buff)
+
+def rxMutex(sock):
+    with lockrx:
+        buff = sock.recv(TIDl)
+    return buff
+
 class Transfer(threading.Thread):
     def __init__(self, Port ,Name, Size, Id, fid, totalf):
         threading.Thread.__init__(self)
@@ -66,18 +79,20 @@ class Transfer(threading.Thread):
                 try:
                     client = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
                     client.connect((SERVER, self.port))
-                    client.sendall(chunkByte)
+                    txMutex(client,chunkByte)
+                    #client.sendall(chunkByte)
                     qEmptySpots -= 1
                 except:
                     print(f"ERROR Tx for port:{self.port}\n")
-                while True:
-                    srvMsg = client.recv(64)
-                    srvMsg = int(srvMsg)
-                    print("current SERVER reply :",srvMsg, ", ",qEmptySpots)
-                    if srvMsg == self.Tid:
-                        qEmptySpots += 1
-                    if qEmptySpots >= 2:
-                        break
+                srvMsg = rxMutex(client)
+                #while True:
+                    #srvMsg = client.recv(TIDl)
+                #    srvMsg = int(srvMsg)
+                #    print("current SERVER reply :",srvMsg, ", ",qEmptySpots)
+                #    if srvMsg == self.Tid:
+                #        qEmptySpots += 1
+                #    if qEmptySpots >= 2:
+                #        break
                 client.close()
                 print(f"SERVER REPLY {srvMsg}, qEmptySpots:{qEmptySpots}")
                 packetCount += 1
@@ -94,8 +109,8 @@ if __name__ == '__main__':
     print(allfiles)
 
     transferthread = [0]*10
-    allfiles.pop(1)
-    filesize.pop(1)
+    #allfiles.pop(1)
+    #filesize.pop(1)
 
     i = 0
     j  = 0
@@ -109,18 +124,24 @@ if __name__ == '__main__':
     client.close()
 
 
-    #client = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-    #client.connect((SERVER, 8090))
-
-
-
+    '''
     # for 1 file
     i = 0
-    transferthread[i] = Transfer(portList[i], allfiles[i], filesize[i], j,i,1)
+    transferthread[i] = Transfer(portList[i], allfiles[i], filesize[i], j,i,len(allfiles))
     #transferthread[i] = Transfer(8060, allfiles[i], filesize[i], j,i,1)
     transferthread[i].start()
     print(f"> started thread 4 file {allfiles[i]}, thread count {threading.active_count()}")  #also includes Parent thread
     transferthread[i].join()
+    '''
+    for i in range(len(allfiles)):
+        transferthread[i] = Transfer(portList[0], allfiles[i], filesize[i], j,i,len(allfiles))
+        transferthread[i].start()
+        print(f"> started thread file: {allfiles[i]}, port:{portList[0]} thread count {threading.active_count()}")  #also includes Parent thread
+        transferthread[i].join()
+        print(f"threadCount :{threading.active_count()}")
+        while True:
+            if threading.active_count() < (threadCount+1):
+                break
 
 
     input()

@@ -107,21 +107,21 @@ class Server(threading.Thread):
         self.server = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
         self.server.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
         self.server.bind((self.hostname, self.port))
-        self.server.listen(2)
+        self.server.listen(25)
 
     def run(self):
         print("AT RUN FUNc")
-        while self.status:
+        while True:
             #break
-            print("at accept")
+            #print("at accept")
             clientsock, clientAddress = self.server.accept()
-            print("Pased accept")
+            #print("Pased accept")
             self.csocket = clientsock
             self.threadJob()
 
 
     def threadJob(self):
-        print("AT job !")
+        #print("AT job !")
 
         global CsumPassed, CsumFailed
         #print ("Connection from : ", clientAddress)
@@ -167,7 +167,7 @@ class Server(threading.Thread):
                 CsumFailed += 1
                 print("byteRecv:",byteRecv,chkSum)
             self.status = False
-        self.csocket.send(bytes(clientThrdId,'UTF-8'))
+        self.csocket.sendall(bytes(clientThrdId,'UTF-8'))
         return
 
 if __name__ == "__main__":
