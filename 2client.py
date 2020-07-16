@@ -4,7 +4,8 @@ import threading
 import os
 import sys
 from hashlib import md5
-from md5sum import md5sum
+#from md5sum import md5sum
+from utilit import *
 
 
 SOURCEPATH = "/u1/h3/hashmi/public_html/source"
@@ -37,10 +38,12 @@ PACKETSIZE = 128* filehash.block_size   #coz md5 has 128*64 digest blks
 
 DATASIZE = PACKETSIZE - HEADERSIZE
 qSize = 0
+chunkByte = ''
 
 class Transfer(threading.Thread):
-    def __init__(self, Name, Size, Id, fid, totalf):
+    def __init__(self, Port ,Name, Size, Id, fid, totalf):
         threading.Thread.__init__(self)
+        self.port = int(Port)
         self.fname = Name
         self.fsize = Size
         self.Tid = fid
@@ -49,6 +52,7 @@ class Transfer(threading.Thread):
         print(f"Constructor end for t{self.Tid}")
 
     def run(self):
+        global chunkByte
         packetCount = 1
         qEmptySpots = 3 #CONCURR
         srvMsg = ''
@@ -57,15 +61,15 @@ class Transfer(threading.Thread):
         with open(self.fname,"r") as fd:
             for chunk in iter(lambda: fd.read(DATASIZE), ""):
                 HEAD = f"{self.fsize:<{SIZEl}}{self.fname:<{NAMEl}}{HASH:<{CHECKSUMl}}{packetCount:<{FILEBLOCKl}}{self.Fid:<{CURRl}}{self.totalfiles:<{TOTALl}}{self.Tid:<{TIDl}}"
-                print(f"> t{self.Tid}, ",len(HEAD)+len(chunk))
+                #print(f"> t{self.Tid}, ",len(HEAD)+len(chunk))
                 chunkByte = bytes(HEAD+chunk, 'utf-8')
                 try:
                     client = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-                    client.connect((SERVER, PORT))
+                    client.connect((SERVER, self.port))
                     client.sendall(chunkByte)
                     qEmptySpots -= 1
                 except:
-                    print(f"ERROR Tx for t{self.Tid}")
+                    print(f"ERROR Tx for port:{self.port}\n")
                 while True:
                     srvMsg = client.recv(64)
                     srvMsg = int(srvMsg)
@@ -82,7 +86,6 @@ class Transfer(threading.Thread):
         #input()
 
 
-#client.sendall(bytes("This is from Client",'UTF-8'))
 if __name__ == '__main__':
     print(os.getcwd())
     print(f"number of files to read {len(allfiles)}")
@@ -91,13 +94,51 @@ if __name__ == '__main__':
     print(allfiles)
 
     transferthread = [0]*10
+    allfiles.pop(1)
+    filesize.pop(1)
 
-    #allfiles.pop(0)
-    #filesize.pop(0)
-    #allfiles.pop(2)
-    #filesize.pop(2)
     i = 0
     j  = 0
+
+    client = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+    client.connect((SERVER, PORT))
+    client.sendall(bytes(f"{threadCount:<20}", 'utf-8'))
+    portList = client.recv(100).decode().split()
+    portList = list(map(int, portList))
+    print(portList)
+    client.close()
+
+
+    #client = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+    #client.connect((SERVER, 8090))
+
+
+
+    # for 1 file
+    i = 0
+    transferthread[i] = Transfer(portList[i], allfiles[i], filesize[i], j,i,1)
+    #transferthread[i] = Transfer(8060, allfiles[i], filesize[i], j,i,1)
+    transferthread[i].start()
+    print(f"> started thread 4 file {allfiles[i]}, thread count {threading.active_count()}")  #also includes Parent thread
+    transferthread[i].join()
+
+
+    input()
+    '''
+    j = 0
+    for i in range(len(2)):
+        transferthread[i] = Transfer(portList[i], allfiles[i], filesize[i], j,i, 1)
+        transferthread[i].start()
+        print(f"> started thread file: {allfiles[i]}, port:{portList[i]} thread count {threading.active_count()}")  #also includes Parent thread
+        j += 1
+        if j == threadCount:
+            j = 0
+            #for k in range(threadCount):
+            #    transferthread[k].join()
+
+
+    input()
+
 
     for i in range(len(allfiles)):
         transferthread[i] = Transfer(allfiles[i], filesize[i], j,i, len(allfiles))
@@ -106,20 +147,6 @@ if __name__ == '__main__':
 
     for i in range(len(allfiles)):
         transferthread[i].join()
-
+    '''
     print("DONE !!!!")
-    '''
-    while i < len(allfiles):
-        if j >= threadCount:
-            j = 0
-        transferthread = Transfer(allfiles[i], filesize[i], j,i, len(allfiles))
-        transferthread.start()
-
-        while True:
-            if threading.active_count() < threadCount +1 :
-                break
-        print(f"started thread {j} file {allfiles[i]}, thread count {threading.active_count()}")
-        i += 1
-        j += 1
-    '''
 
