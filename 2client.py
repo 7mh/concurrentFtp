@@ -10,8 +10,8 @@ import time
 
 
 #SOURCEPATH = "/u1/h3/hashmi/public_html/source"
-#SOURCEPATH = "/u1/h3/hashmi/public_html/sourceM10"
-SOURCEPATH = "/u1/h3/hashmi/public_html/sourceM"
+SOURCEPATH = "/u1/h3/hashmi/public_html/sourceM10"
+#SOURCEPATH = "/u1/h3/hashmi/public_html/sourceM"
 os.chdir(SOURCEPATH)
 CONCURR = 1     #sys.argv[1]
 
@@ -57,21 +57,6 @@ def rxMutex(sock,i):
         buff = sock.recv(TIDl)
     return buff
 
-'''
-locktx = threading.Lock()
-lockrx = threading.Lock()
-
-def txMutex(sock, buff):
-    global locktx
-    with locktx:
-        sock.sendall(buff)
-
-def rxMutex(sock):
-    global lockrx
-    with lockrx:
-        buff = sock.recv(TIDl)
-    return buff
-'''
 class Transfer(threading.Thread):
     def __init__(self, Port ,Name, Size, Id, fid, totalf):
         threading.Thread.__init__(self)
@@ -81,7 +66,10 @@ class Transfer(threading.Thread):
         self.Tid = Id
         self.Fid = fid
         self.totalfiles = totalf
-        print(f"Constructor end for t{self.Tid}")
+        with open(self.fname,"r") as fd:
+            self.data = fd.read()
+
+        print(f"Constructor end for t{self.Tid} filesize: {len(self.data)}")
 
     def run(self):
         global chunkByte
@@ -113,7 +101,7 @@ class Transfer(threading.Thread):
                 #    if qEmptySpots >= 2:
                 #        break
                 client.close()
-                print(f"SERVER REPLY {srvMsg}, qEmptySpots:{qEmptySpots}")
+                #print(f"SERVER REPLY {srvMsg}, qEmptySpots:{qEmptySpots}")
                 packetCount += 1
         print(f"{self.fname} Done reading\n")
         print(HASH, f"packetcount{packetCount}")
