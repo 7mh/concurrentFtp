@@ -9,6 +9,7 @@ from utilit import *
 
 
 #SOURCEPATH = "/u1/h3/hashmi/public_html/source"
+#SOURCEPATH = "/u1/h3/hashmi/public_html/sourceM10"
 SOURCEPATH = "/u1/h3/hashmi/public_html/sourceM"
 os.chdir(SOURCEPATH)
 CONCURR = 1     #sys.argv[1]
@@ -41,25 +42,42 @@ DATASIZE = PACKETSIZE - HEADERSIZE
 qSize = 0
 chunkByte = ''
 
+locktx = [threading.Lock() for i in range(10)]
+lockrx = [threading.Lock() for i in range(10)]
+
+def txMutex(sock, buff,i):
+    global locktx
+    with locktx[i]:
+        sock.sendall(buff)
+
+def rxMutex(sock,i):
+    global lockrx
+    with lockrx[i]:
+        buff = sock.recv(TIDl)
+    return buff
+
+'''
 locktx = threading.Lock()
 lockrx = threading.Lock()
 
 def txMutex(sock, buff):
+    global locktx
     with locktx:
         sock.sendall(buff)
 
 def rxMutex(sock):
+    global lockrx
     with lockrx:
         buff = sock.recv(TIDl)
     return buff
-
+'''
 class Transfer(threading.Thread):
     def __init__(self, Port ,Name, Size, Id, fid, totalf):
         threading.Thread.__init__(self)
         self.port = int(Port)
         self.fname = Name
         self.fsize = Size
-        self.Tid = fid
+        self.Tid = Id
         self.Fid = fid
         self.totalfiles = totalf
         print(f"Constructor end for t{self.Tid}")
@@ -79,12 +97,12 @@ class Transfer(threading.Thread):
                 try:
                     client = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
                     client.connect((SERVER, self.port))
-                    txMutex(client,chunkByte)
+                    txMutex(client,chunkByte, self.Tid)
                     #client.sendall(chunkByte)
                     qEmptySpots -= 1
                 except:
                     print(f"ERROR Tx for port:{self.port}\n")
-                srvMsg = rxMutex(client)
+                srvMsg = rxMutex(client, self.Tid)
                 #while True:
                     #srvMsg = client.recv(TIDl)
                 #    srvMsg = int(srvMsg)
@@ -139,9 +157,9 @@ if __name__ == '__main__':
         print(f"> started thread file: {allfiles[i]}, port:{portList[0]} thread count {threading.active_count()}")  #also includes Parent thread
         transferthread[i].join()
         print(f"threadCount :{threading.active_count()}")
-        while True:
-            if threading.active_count() < (threadCount+1):
-                break
+        #while True:
+        #    if threading.active_count() < (threadCount+1):
+        #        break
 
 
     input()
