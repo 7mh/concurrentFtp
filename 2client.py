@@ -6,6 +6,7 @@ import sys
 from hashlib import md5
 #from md5sum import md5sum
 from utilit import *
+import time
 
 
 #SOURCEPATH = "/u1/h3/hashmi/public_html/source"
@@ -122,11 +123,11 @@ class Transfer(threading.Thread):
 if __name__ == '__main__':
     print(os.getcwd())
     print(f"number of files to read {len(allfiles)}")
-    client = 1
+    print(f"Client IP:{ socket.gethostbyaddr( socket.gethostname( )) }")
     threadCount = int(sys.argv[1])
     print(allfiles)
 
-    transferthread = [0]*10
+    transferthread = [0]*len(allfiles)
     #allfiles.pop(1)
     #filesize.pop(1)
 
@@ -151,18 +152,26 @@ if __name__ == '__main__':
     print(f"> started thread 4 file {allfiles[i]}, thread count {threading.active_count()}")  #also includes Parent thread
     transferthread[i].join()
     '''
+    start = time.time()
     for i in range(len(allfiles)):
         transferthread[i] = Transfer(portList[0], allfiles[i], filesize[i], j,i,len(allfiles))
         transferthread[i].start()
         print(f"> started thread file: {allfiles[i]}, port:{portList[0]} thread count {threading.active_count()}")  #also includes Parent thread
         transferthread[i].join()
-        print(f"threadCount :{threading.active_count()}")
+        #print(f"threadCount :{threading.active_count()}")
         #while True:
         #    if threading.active_count() < (threadCount+1):
         #        break
 
+    stop = time.time()
+    tot = stop - start
+    totsum = 0
+    for i in range(len(filesize)):
+        totsum += filesize[i]
 
-    input()
+    print(f"Time taken:{tot} throughput for {len(allfiles)} files: {((totsum*100)/tot)/1000000} Mb/s ")
+
+    #input()
     '''
     j = 0
     for i in range(len(2)):

@@ -12,6 +12,7 @@ import pdb
 LOCALHOST = socket.gethostname()  #"127.0.0.1"
 #LOCALHOST = socket.gethostbyaddr(socket.gethostname())[2][0]
 PORT = 8089
+MAXFILES = 150
 #HEADERSIZE = 20
 ###############################################################
 SIZEl = 20              #20:filesize, 50:name, 32:CSum 8:EXTRA
@@ -29,8 +30,8 @@ SOURCEPATH = "/u1/h3/hashmi/public_html/dest"
 os.chdir(SOURCEPATH)
 CONCCUR = 1
 #table = [{} for i in range(150)]
-table = [[] for i in range(150)]
-byteRecv = [0 for i in range(150)]
+table = [[] for i in range(MAXFILES)]
+byteRecv = [0 for i in range(MAXFILES)]
 
 CsumPassed = 0
 CsumFailed = 0
@@ -42,7 +43,7 @@ class ClientThread(threading.Thread):
         #print ("New connection added: ", clientAddress)
 
     def run(self):
-        global CsumPassed, CsumFailed
+        global CsumPassed, CsumFailed, table, byteRecv
         #print ("Connection from : ", clientAddress)
         #self.csocket.send(bytes("Hi, This is from Server..",'utf-8'))
         msg = ''
@@ -79,7 +80,7 @@ class ClientThread(threading.Thread):
             if filechksum == chkSum:
                 print(f"> file size {filesize}, {filename},fileblock: {fileblock}, {filechksum}, currfile:{currfile}, tot:{totalfiles}, tid:{clientThrdId}")
                 print(filename, ">>>>>>>>>>>>>>>> CHECKSUM PASSED !")
-                #table[currfile].clear()
+                table[currfile].clear()
                 CsumPassed += 1
             else:
                 print(filename, ">>>>>>>>>CHECKSUM failED !")
@@ -107,7 +108,7 @@ class Server(threading.Thread):
         self.server = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
         self.server.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
         self.server.bind((self.hostname, self.port))
-        self.server.listen(25)
+        self.server.listen(3)
 
     def run(self):
         print("AT RUN FUNc")
@@ -115,7 +116,7 @@ class Server(threading.Thread):
             #break
             #print("at accept")
             clientsock, clientAddress = self.server.accept()
-            #print("Pased accept")
+            #print(f"Passed accept  from: {clientAddress}")
             self.csocket = clientsock
             self.threadJob()
 
@@ -167,7 +168,7 @@ class Server(threading.Thread):
                 CsumFailed += 1
                 print("byteRecv:",byteRecv,chkSum)
             self.status = False
-        self.csocket.sendall(bytes(clientThrdId,'UTF-8'))
+        self.csocket.sendall(bytes(str(int(clientThrdId)+1),'UTF-8'))
         return
 
 if __name__ == "__main__":
@@ -184,7 +185,7 @@ if __name__ == "__main__":
 
     clientsock, clientAddress = server.accept()
     threadCount = int(clientsock.recv(20))
-    print("thread count", threadCount)
+    print("thread count", threadCount, f"Client at : {clientAddress}")
     portList = getPortList(threadCount, PORT)
     clientsock.sendall(bytes(' '.join(portList), 'utf-8'))
 
