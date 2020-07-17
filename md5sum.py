@@ -1,7 +1,5 @@
 #!/usr/bin/env python
 
-"""Tool to compuete md5 sums of files"""
-
 import sys
 from hashlib import md5
 

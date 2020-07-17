@@ -4,7 +4,6 @@ import threading
 import os
 import sys
 from hashlib import md5
-#from md5sum import md5sum
 from utilit import *
 import time
 import math
@@ -12,8 +11,8 @@ import math
 
 #SOURCEPATH = "/u1/h3/hashmi/public_html/source"
 #SOURCEPATH = "/u1/h3/hashmi/public_html/sourceM10"
-SOURCEPATH = "/u1/h3/hashmi/public_html/sourceM"
-#SOURCEPATH = "/u1/h3/hashmi/public_html/sourceG"
+#SOURCEPATH = "/u1/h3/hashmi/public_html/sourceM"
+SOURCEPATH = "/u1/h3/hashmi/public_html/sourceG"
 os.chdir(SOURCEPATH)
 CONCURR = 1     #sys.argv[1]
 
@@ -21,8 +20,8 @@ CONCURR = 1     #sys.argv[1]
 allfiles = os.listdir()
 filesize = [os.stat(i).st_size for i in allfiles]
 
-#SERVER = "127.0.0.1"                 #SELECT HOME ADDR or GET MACHINE IP
-SERVER = "cs.indstate.edu"
+SERVER = "127.0.0.1"                 #SELECT HOME ADDR or GET MACHINE IP
+#SERVER = "cs.indstate.edu"
 #SERVER = socket.gethostbyaddr(socket.gethostname())[2][0]
 
 #########################################################
@@ -121,8 +120,8 @@ class Transfer(threading.Thread):
                 client.close()
                 #print(f"SERVER REPLY {srvMsg}, qEmptySpots:{qEmptySpots}")
                 packetCount += 1
-        print(f"{self.fname} Done reading\n")
-        print(HASH, f"packetcount{packetCount}")
+        print(f"file: {self.fname} Done reading\n")
+        print(f"Thread END.  packetcount{packetCount}")
         #input()
 
 
@@ -196,8 +195,8 @@ if __name__ == '__main__':
         totsum = 0
         for i in range(len(filesize)):
             totsum += filesize[i]
+        print(f"Time taken:{tot} throughput for {len(allfiles)} files: {((totsum)/tot)/1000000} Mb/s ")
 
-        print(f"Time taken:{tot} throughput for {len(allfiles)} files: {((totsum*100)/tot)/1000000} Mb/s ")
 
 
 

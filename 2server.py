@@ -4,13 +4,12 @@ import socket
 import threading
 import os
 from hashlib import md5
-#from md5sum import md5sum
 from utilit import *
 import pdb
 
 
-#LOCALHOST = '127.0.0.1'
-LOCALHOST = socket.gethostname()  #"127.0.0.1"
+LOCALHOST = '127.0.0.1'
+#LOCALHOST = socket.gethostname()  #"127.0.0.1"
 #LOCALHOST = socket.gethostbyaddr(socket.gethostname())[2][0]
 PORT = 5050
 MAXFILES = 100
