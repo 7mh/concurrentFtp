@@ -28,7 +28,7 @@ HEADERSIZE =  SIZEl+NAMEl+CHECKSUMl+FILEBLOCKl+CURRl+TOTALl+TIDl
 filehash = md5()
 PACKETSIZE = 128* filehash.block_size   #coz md5 has 128*64 digest blks
 
-subprocess('./checkDest.sh')
+subprocess.run('./checkDest.sh')
 SOURCEPATH = "./dest"
 os.chdir(SOURCEPATH)
 CONCCUR = 1

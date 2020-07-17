@@ -9,7 +9,7 @@ import time
 import math
 import subprocess
 
-print("Usage $> 'client.py [ThreadCount]' ")
+print("Usage $> 'client.py [ThreadCount]' \n")
 
 #SOURCEPATH = "./sourceM10"
 SOURCEPATH = "../sourceM"
@@ -119,14 +119,14 @@ if __name__ == '__main__':
     print(os.getcwd())
     print(f"number of files to read {len(allfiles)}")
     print(f"Client IP:{ socket.gethostbyaddr( socket.gethostname( )) }")
-    if len(sys.argv)
-    threadCount = int(sys.argv[1])
+    if len(sys.argv) == 1:
+        threadCount = 1
+    else:
+        threadCount = int(sys.argv[1])
     print(allfiles)
 
     transferthread = [0]*len(allfiles)
 
-    i = 0
-    j  = 0
 
     client = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
     client.connect((SERVER, PORT))
@@ -136,55 +136,26 @@ if __name__ == '__main__':
     print(portList)
     client.close()
 
+    s = '01234567'
+    t = s[:threadCount]*(math.ceil(len(allfiles)/threadCount))
+    t = t[:len(allfiles)]
+    #print(t, f",  len(t)")
+    j = 0
+    start = time.time()
+    for i in t:
+        k = int(i)
+        transferthread[j] = Transfer(portList[k], allfiles[j], filesize[j], k,j,len(allfiles))
+        transferthread[j].start()
+        print(f"> started thread file: {allfiles[k]}, port:{portList[k]} thread count {threading.active_count()}")  #also includes Parent thread
+        transferthread[j].join()
+        j += 1
 
-    '''
-    # for 1 file
-    i = 0
-    transferthread[i] = Transfer(portList[i], allfiles[i], filesize[i], j,i,len(allfiles))
-    #transferthread[i] = Transfer(8060, allfiles[i], filesize[i], j,i,1)
-    transferthread[i].start()
-    print(f"> started thread 4 file {allfiles[i]}, thread count {threading.active_count()}")  #also includes Parent thread
-    transferthread[i].join()
-    '''
-    if threadCount == 1:
-        start = time.time()
-        for i in range(len(allfiles)):
-            transferthread[i] = Transfer(portList[0], allfiles[i], filesize[i], j,i,len(allfiles))
-            transferthread[i].start()
-            print(f"> started thread file: {allfiles[i]}, port:{portList[0]} thread count {threading.active_count()}")  #also includes Parent thread
-            transferthread[i].join()
-
-        stop = time.time()
-        tot = stop - start
-        totsum = 0
-        for i in range(len(filesize)):
-            totsum += filesize[i]
-
-        print(f"Time taken:{tot} throughput for {len(allfiles)} files: {((totsum*100)/tot)/1000000} Mb/s ")
-
-    else:
-        s = '01234567'
-        t = s[:threadCount]*(math.ceil(len(allfiles)/threadCount))
-        t = t[:len(allfiles)]
-    #tIndex = [t[i:i+threadCount] for i in range(0,len(t),threadCount)]
-        print(t, f",  len(t)")
-        #input()
-        j = 0
-        start = time.time()
-        for i in t:
-            k = int(i)
-            transferthread[j] = Transfer(portList[k], allfiles[j], filesize[j], k,j,len(allfiles))
-            transferthread[j].start()
-            print(f"> started thread file: {allfiles[k]}, port:{portList[k]} thread count {threading.active_count()}")  #also includes Parent thread
-            transferthread[j].join()
-            j += 1
-
-        stop = time.time()
-        tot = stop - start
-        totsum = 0
-        for i in range(len(filesize)):
-            totsum += filesize[i]
-        print(f"Time taken:{tot} throughput for {len(allfiles)} files: {((totsum)/tot)/1000000} Mb/s ")
+    stop = time.time()
+    tot = stop - start
+    totsum = 0
+    for i in range(len(filesize)):
+        totsum += filesize[i]
+    print(f"Time taken:{tot} throughput for {len(allfiles)} files: {((totsum)/tot)/1000000} Mb/s ")
 
 
 
@@ -192,5 +163,5 @@ if __name__ == '__main__':
 
 
 
-    print("DONE !!!!")
+print("DONE !!!!")
 
