@@ -7,12 +7,18 @@ from hashlib import md5
 from utilit import *
 import time
 import math
+import subprocess
 
+print("Usage $> 'client.py [ThreadCount]' ")
 
-#SOURCEPATH = "/u1/h3/hashmi/public_html/source"
-#SOURCEPATH = "/u1/h3/hashmi/public_html/sourceM10"
-#SOURCEPATH = "/u1/h3/hashmi/public_html/sourceM"
-SOURCEPATH = "/u1/h3/hashmi/public_html/sourceG"
+#SOURCEPATH = "./sourceM10"
+SOURCEPATH = "../sourceM"
+#SOURCEPATH = "../sourceG"
+#SOURCEPATH = "../sourceComb"
+
+#Check if All data folders are there if not create
+subprocess.run("./generateData.sh")
+
 os.chdir(SOURCEPATH)
 CONCURR = 1     #sys.argv[1]
 
@@ -76,10 +82,6 @@ class Transfer(threading.Thread):
         self.data = ""
         with open(self.fname,"r") as fd:
             self.data = fd.read()
-        #self.hash = md5()
-        #with open(self.fname, "rb") as fd:
-        #    for chunk in iter(lambda: fd.read(128*self.hash.block_size), b""):
-        #        self.data = self.data.join
 
         print(f"Constructor end for t{self.Tid} filesize: {len(self.data)}")
 
@@ -90,33 +92,21 @@ class Transfer(threading.Thread):
         srvMsg = ''
         HASH = md5sum(self.fname)
         print(f" t{self.Tid} GoT HASH : {HASH}")
-        #with open(self.fname,"r") as fd:
-        #    for chunk in iter(lambda: fd.read(DATASIZE), ""):
         for i in range(0,len(self.data),DATASIZE):
                 chunk = self.data[i:i+DATASIZE]
                 HEAD = f"{self.fsize:<{SIZEl}}{self.fname:<{NAMEl}}{HASH:<{CHECKSUMl}}{packetCount:<{FILEBLOCKl}}{self.Fid:<{CURRl}}{self.totalfiles:<{TOTALl}}{self.Tid:<{TIDl}}"
                 #print(f"> t{self.Tid}, ",f"fileBlock: {packetCount}" )
-                #print(HEAD)
                 chunkByte = bytes(HEAD+chunk, 'utf-8')
                 try:
                     client = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
                     client.connect((SERVER, self.port))
                     txMutex(client,chunkByte, self.Fid)
-                    #client.sendall(chunkByte)
                     qEmptySpots -= 1
                 except:
                     print(f"ERROR Tx for port:{self.port}\n")
                     e = sys.exc_info()
                     print(e)
                 #srvMsg = rxMutex(client, self.Tid)
-                #while True:
-                    #srvMsg = client.recv(TIDl)
-                #    srvMsg = int(srvMsg)
-                #    print("current SERVER reply :",srvMsg, ", ",qEmptySpots)
-                #    if srvMsg == self.Tid:
-                #        qEmptySpots += 1
-                #    if qEmptySpots >= 2:
-                #        break
                 client.close()
                 #print(f"SERVER REPLY {srvMsg}, qEmptySpots:{qEmptySpots}")
                 packetCount += 1
@@ -129,12 +119,11 @@ if __name__ == '__main__':
     print(os.getcwd())
     print(f"number of files to read {len(allfiles)}")
     print(f"Client IP:{ socket.gethostbyaddr( socket.gethostname( )) }")
+    if len(sys.argv)
     threadCount = int(sys.argv[1])
     print(allfiles)
 
     transferthread = [0]*len(allfiles)
-    #allfiles.pop(1)
-    #filesize.pop(1)
 
     i = 0
     j  = 0

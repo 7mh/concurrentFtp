@@ -6,6 +6,7 @@ import os
 from hashlib import md5
 from utilit import *
 import pdb
+import subprocess
 
 
 LOCALHOST = '127.0.0.1'
@@ -26,7 +27,9 @@ HEADERSIZE =  SIZEl+NAMEl+CHECKSUMl+FILEBLOCKl+CURRl+TOTALl+TIDl
 ###############################################################
 filehash = md5()
 PACKETSIZE = 128* filehash.block_size   #coz md5 has 128*64 digest blks
-SOURCEPATH = "/u1/h3/hashmi/public_html/dest"
+
+subprocess('./checkDest.sh')
+SOURCEPATH = "./dest"
 os.chdir(SOURCEPATH)
 CONCCUR = 1
 #table = [{} for i in range(150)]
