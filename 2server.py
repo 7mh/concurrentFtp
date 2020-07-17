@@ -9,11 +9,11 @@ from utilit import *
 import pdb
 
 
-#LOCALHOST = socket.gethostname()  #"127.0.0.1"
-LOCALHOST = '127.0.0.1'
+#LOCALHOST = '127.0.0.1'
+LOCALHOST = socket.gethostname()  #"127.0.0.1"
 #LOCALHOST = socket.gethostbyaddr(socket.gethostname())[2][0]
-PORT = 8089
-MAXFILES = 150
+PORT = 5050
+MAXFILES = 100
 #HEADERSIZE = 20
 ###############################################################
 SIZEl = 20              #20:filesize, 50:name, 32:CSum 8:EXTRA
@@ -54,7 +54,7 @@ class ClientThread(threading.Thread):
         data = self.csocket.recv(PACKETSIZE)
         msg = data.decode()
         HEADER = msg[:HEADERSIZE]
-        #print(f"HEADER !!! : {HEADER}")
+        print(f"HEADER !!! : {HEADER}")
         filesize = int(HEADER[:SIZEl])
         filename = HEADER[SIZEl: (SIZEl+NAMEl)].rstrip()
         filechksum = HEADER[(SIZEl+NAMEl):(SIZEl+NAMEl+CHECKSUMl)]
