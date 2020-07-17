@@ -10,8 +10,8 @@ import time
 
 
 #SOURCEPATH = "/u1/h3/hashmi/public_html/source"
-SOURCEPATH = "/u1/h3/hashmi/public_html/sourceM10"
-#SOURCEPATH = "/u1/h3/hashmi/public_html/sourceM"
+#SOURCEPATH = "/u1/h3/hashmi/public_html/sourceM10"
+SOURCEPATH = "/u1/h3/hashmi/public_html/sourceM"
 os.chdir(SOURCEPATH)
 CONCURR = 1     #sys.argv[1]
 
@@ -19,7 +19,7 @@ CONCURR = 1     #sys.argv[1]
 allfiles = os.listdir()
 filesize = [os.stat(i).st_size for i in allfiles]
 
-SERVER = "cs.indstate.edu"                 #SELECT HOME ADDR or GET MACHINE IP
+SERVER = "127.0.0.1"                 #SELECT HOME ADDR or GET MACHINE IP
 #SERVER = socket.gethostbyaddr(socket.gethostname())[2][0]
 
 #########################################################
@@ -49,7 +49,12 @@ lockrx = [threading.Lock() for i in range(10)]
 def txMutex(sock, buff,i):
     global locktx
     with locktx[i]:
-        sock.sendall(buff)
+        try:
+            sock.sendall(buff)
+        except:
+            e = sys.exc_info()[0]
+            print("EXCEPTION in writing")
+            print(e)
 
 def rxMutex(sock,i):
     global lockrx
@@ -66,8 +71,13 @@ class Transfer(threading.Thread):
         self.Tid = Id
         self.Fid = fid
         self.totalfiles = totalf
+        self.data = ""
         with open(self.fname,"r") as fd:
             self.data = fd.read()
+        #self.hash = md5()
+        #with open(self.fname, "rb") as fd:
+        #    for chunk in iter(lambda: fd.read(128*self.hash.block_size), b""):
+        #        self.data = self.data.join
 
         print(f"Constructor end for t{self.Tid} filesize: {len(self.data)}")
 
@@ -78,8 +88,10 @@ class Transfer(threading.Thread):
         srvMsg = ''
         HASH = md5sum(self.fname)
         print(f" t{self.Tid} GoT HASH : {HASH}")
-        with open(self.fname,"r") as fd:
-            for chunk in iter(lambda: fd.read(DATASIZE), ""):
+        #with open(self.fname,"r") as fd:
+        #    for chunk in iter(lambda: fd.read(DATASIZE), ""):
+        for i in range(0,len(self.data),DATASIZE):
+                chunk = self.data[i:i+DATASIZE]
                 HEAD = f"{self.fsize:<{SIZEl}}{self.fname:<{NAMEl}}{HASH:<{CHECKSUMl}}{packetCount:<{FILEBLOCKl}}{self.Fid:<{CURRl}}{self.totalfiles:<{TOTALl}}{self.Tid:<{TIDl}}"
                 #print(f"> t{self.Tid}, ",len(HEAD)+len(chunk))
                 chunkByte = bytes(HEAD+chunk, 'utf-8')
@@ -91,7 +103,9 @@ class Transfer(threading.Thread):
                     qEmptySpots -= 1
                 except:
                     print(f"ERROR Tx for port:{self.port}\n")
-                srvMsg = rxMutex(client, self.Tid)
+                    e = sys.exc_info()
+                    print(e)
+                #srvMsg = rxMutex(client, self.Tid)
                 #while True:
                     #srvMsg = client.recv(TIDl)
                 #    srvMsg = int(srvMsg)

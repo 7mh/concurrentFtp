@@ -9,7 +9,8 @@ from utilit import *
 import pdb
 
 
-LOCALHOST = socket.gethostname()  #"127.0.0.1"
+#LOCALHOST = socket.gethostname()  #"127.0.0.1"
+LOCALHOST = '127.0.0.1'
 #LOCALHOST = socket.gethostbyaddr(socket.gethostname())[2][0]
 PORT = 8089
 MAXFILES = 150
@@ -79,9 +80,9 @@ class ClientThread(threading.Thread):
             chkSum = md5sum(filename)
             if filechksum == chkSum:
                 print(f"> file size {filesize}, {filename},fileblock: {fileblock}, {filechksum}, currfile:{currfile}, tot:{totalfiles}, tid:{clientThrdId}")
-                print(filename, ">>>>>>>>>>>>>>>> CHECKSUM PASSED !")
                 table[currfile].clear()
                 CsumPassed += 1
+                print(filename, ">>>>>>>>>>>>>>>> CHECKSUM PASSED !",CsumPassed)
             else:
                 print(filename, ">>>>>>>>>CHECKSUM failED !")
                 CsumFailed += 1
@@ -104,11 +105,10 @@ class Server(threading.Thread):
         threading.Thread.__init__(self)
         self.hostname = hostname
         self.port = port
-        self.status = True
         self.server = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
         self.server.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
         self.server.bind((self.hostname, self.port))
-        self.server.listen(3)
+        self.server.listen(10)
 
     def run(self):
         print("AT RUN FUNc")
@@ -124,7 +124,7 @@ class Server(threading.Thread):
     def threadJob(self):
         #print("AT job !")
 
-        global CsumPassed, CsumFailed
+        global CsumPassed, CsumFailed, table, byteRecv
         #print ("Connection from : ", clientAddress)
         #self.csocket.send(bytes("Hi, This is from Server..",'utf-8'))
         msg = ''
@@ -160,15 +160,14 @@ class Server(threading.Thread):
             chkSum = md5sum(filename)
             if filechksum == chkSum:
                 print(f"> file size {filesize}, {filename},fileblock: {fileblock}, {filechksum}, currfile:{currfile}, tot:{totalfiles}, tid:{clientThrdId}")
-                print(filename, ">>>>>>>>>>>>>>>> CHECKSUM PASSED !")
-                #table[currfile].clear()
+                table[currfile].clear()
                 CsumPassed += 1
+                print(filename, ">>>>>>>>>>>>>>>> CHECKSUM PASSED !",CsumPassed, f"len table:{len(table[currfile])}")
             else:
                 print(filename, ">>>>>>>>>CHECKSUM failED !")
                 CsumFailed += 1
                 print("byteRecv:",byteRecv,chkSum)
-            self.status = False
-        self.csocket.sendall(bytes(str(int(clientThrdId)+1),'UTF-8'))
+        #self.csocket.sendall(bytes(str(int(clientThrdId)+1),'UTF-8'))
         return
 
 if __name__ == "__main__":
