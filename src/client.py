@@ -30,17 +30,17 @@ SERVER = "127.0.0.1"                 #SELECT HOME ADDR or GET MACHINE IP
 #SERVER = "cs.indstate.edu"
 #SERVER = socket.gethostbyaddr(socket.gethostname())[2][0]
 
+PORT = 5090
 #########################################################
-# HEADER       # 116 bytes
+# HEADER       # 118 bytes
 
-PORT = 5050
-SIZEl = 20
-NAMEl = 50
-CHECKSUMl = 32
-FILEBLOCKl = 8
-CURRl = 3
-TOTALl = 3
-TIDl = 2
+SIZEl = 20          #file size
+NAMEl = 50          #file name
+CHECKSUMl = 32      #checksum
+FILEBLOCKl = 8      #file block
+CURRl = 3           #currnt file index
+TOTALl = 3          #total files
+TIDl = 2            #thread id
 HEADERSIZE = SIZEl+NAMEl+CHECKSUMl+FILEBLOCKl+CURRl+TOTALl+TIDl
 #########################################################
 
