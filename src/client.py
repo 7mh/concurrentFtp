@@ -51,8 +51,8 @@ DATASIZE = PACKETSIZE - HEADERSIZE
 qSize = 0
 chunkByte = ''
 
-locktx = [threading.Lock() for i in range(100)]
-lockrx = [threading.Lock() for i in range(100)]
+locktx = [threading.Lock() for i in range(len(allfiles))]
+lockrx = [threading.Lock() for i in range(len(allfiles))]
 
 def txMutex(sock, buff,i):
     global locktx
@@ -155,8 +155,10 @@ if __name__ == '__main__':
     totsum = 0
     for i in range(len(filesize)):
         totsum += filesize[i]
-    print(f"Time taken:{tot} throughput for {len(allfiles)} files: {((totsum)/tot)/1000000} Mb/s ")
-
+    result = print(f"Time taken:{tot} throughput for {len(allfiles)} files: {((totsum)/tot)/1000000} Mb/s ")
+    print(result)
+    with open("Result","a+") as fd:
+        fd.write(result)
 
 
 

@@ -13,7 +13,7 @@ LOCALHOST = '127.0.0.1'
 #LOCALHOST = socket.gethostname()  #"127.0.0.1"
 #LOCALHOST = socket.gethostbyaddr(socket.gethostname())[2][0]
 PORT = 5050
-MAXFILES = 100
+MAXFILES = 150
 #HEADERSIZE = 20
 ###############################################################
 SIZEl = 20              #20:filesize, 50:name, 32:CSum 8:EXTRA
