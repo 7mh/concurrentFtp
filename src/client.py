@@ -155,10 +155,7 @@ if __name__ == '__main__':
     totsum = 0
     for i in range(len(filesize)):
         totsum += filesize[i]
-    result = print(f"Time taken:{tot} throughput for {len(allfiles)} files: {((totsum)/tot)/1000000} Mb/s ")
-    print(result)
-    with open("Result","a+") as fd:
-        fd.write(result)
+    print(f"Time taken:{tot} throughput for {len(allfiles)} files: {((totsum)/tot)/1000000} Mb/s ")
 
 
 
