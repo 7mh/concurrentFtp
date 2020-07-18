@@ -12,9 +12,9 @@ import subprocess
 print("Usage $> 'client.py [ThreadCount]' \n")
 
 #SOURCEPATH = "./sourceM10"
-#SOURCEPATH = "../sourceM"
+SOURCEPATH = "../sourceM"
 #SOURCEPATH = "../sourceG"
-SOURCEPATH = "../sourceComb"
+#SOURCEPATH = "../sourceComb"
 
 #Check if All data folders are there if not create
 subprocess.run("./generateData.sh")
