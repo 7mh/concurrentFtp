@@ -30,7 +30,7 @@ SERVER = "127.0.0.1"                 #SELECT HOME ADDR or GET MACHINE IP
 #SERVER = "cs.indstate.edu"
 #SERVER = socket.gethostbyaddr(socket.gethostname())[2][0]
 
-PORT = 5090
+PORT = 5050
 #########################################################
 # HEADER       # 118 bytes
 
@@ -136,10 +136,10 @@ if __name__ == '__main__':
     print(portList)
     client.close()
 
-    s = '01234567'
+    s = '0123456789'
     t = s[:threadCount]*(math.ceil(len(allfiles)/threadCount))
     t = t[:len(allfiles)]
-    #print(t, f",  len(t)")
+    print(t, f",  len(t)")
     j = 0
     start = time.time()
     for i in t:
