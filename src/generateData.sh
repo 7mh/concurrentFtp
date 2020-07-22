@@ -1,8 +1,8 @@
 #!/bin/bash
 
 ./100Mdata.sh
-./1Gdata.sh
-./combineData.sh
+#./1Gdata.sh
+#./combineData.sh
 
 if [ -d  "./dest" ]
 then

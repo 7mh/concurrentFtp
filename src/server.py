@@ -107,6 +107,7 @@ class Server(threading.Thread):
                 print(filename, ">>>>>>>>>CHECKSUM failED !")
                 CsumFailed += 1
                 print("byteRecv:",byteRecv,chkSum)
+        self.csocket.send(bytes(clientThrdId,'UTF-8'))
         return
 
 if __name__ == "__main__":

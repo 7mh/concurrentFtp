@@ -27,8 +27,8 @@ allfiles = os.listdir()
 filesize = [os.stat(i).st_size for i in allfiles]
 
 #SERVER = "127.0.0.1"                 #SELECT HOME ADDR or GET MACHINE IP
-SERVER = "cs.indstate.edu"
-#SERVER = socket.gethostbyaddr(socket.gethostname())[2][0]
+#SERVER = "cs.indstate.edu"
+SERVER = socket.gethostbyaddr(socket.gethostname())[2][0]
 
 PORT = 5090
 #########################################################
@@ -107,6 +107,7 @@ class Transfer(threading.Thread):
                     e = sys.exc_info()
                     print(e)
                 #srvMsg = rxMutex(client, self.Tid)
+                srvMsg = client.recv(TIDl)
                 client.close()
                 #print(f"SERVER REPLY {srvMsg}, qEmptySpots:{qEmptySpots}")
                 packetCount += 1
