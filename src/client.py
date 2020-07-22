@@ -26,11 +26,11 @@ CONCURR = 1     #sys.argv[1]
 allfiles = os.listdir()
 filesize = [os.stat(i).st_size for i in allfiles]
 
-SERVER = "127.0.0.1"                 #SELECT HOME ADDR or GET MACHINE IP
-#SERVER = "cs.indstate.edu"
+#SERVER = "127.0.0.1"                 #SELECT HOME ADDR or GET MACHINE IP
+SERVER = "cs.indstate.edu"
 #SERVER = socket.gethostbyaddr(socket.gethostname())[2][0]
 
-PORT = 5050
+PORT = 5090
 #########################################################
 # HEADER       # 118 bytes
 

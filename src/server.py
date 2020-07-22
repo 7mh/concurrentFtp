@@ -9,10 +9,10 @@ import pdb
 import subprocess
 
 
-LOCALHOST = '127.0.0.1'
-#LOCALHOST = socket.gethostname()  #"127.0.0.1"
+#LOCALHOST = '127.0.0.1'
+LOCALHOST = socket.gethostname()  #"127.0.0.1"
 #LOCALHOST = socket.gethostbyaddr(socket.gethostname())[2][0]
-PORT = 5050
+PORT = 5090
 MAXFILES = 150
 #HEADERSIZE = 20
 ###############################################################
@@ -102,7 +102,7 @@ class Server(threading.Thread):
                 print(f"> file size {filesize}, {filename},fileblock: {fileblock}, {filechksum}, currfile:{currfile}, tot:{totalfiles}, tid:{clientThrdId}")
                 table[currfile].clear()
                 CsumPassed += 1
-                print(filename, ">>>>>>>>>>>>>>>> CHECKSUM PASSED !",CsumPassed, f"len table:{len(table[currfile])}")
+                print(filename, ">>>>>>>>>>>>>>>> CHECKSUM PASSED !",CsumPassed, f"len table:{len(table[currfile])}\n")
             else:
                 print(filename, ">>>>>>>>>CHECKSUM failED !")
                 CsumFailed += 1
