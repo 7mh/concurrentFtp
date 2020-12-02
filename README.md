@@ -1,4 +1,4 @@
-# Concurrent Ftp
+# Concurrent scp
  A concurrent file transfer app.
 
 ## Prerequisite
