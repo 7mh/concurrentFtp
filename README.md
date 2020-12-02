@@ -1,5 +1,5 @@
 # Concurrent File Transfer
- A concurrent file transfer app.
+ A concurrent file transfer app. <br/>
  The goal of this project is to create a multi-threaded version of "rsync".
  
  Transfer validation is acheived by calculating MD5 checksum before and after transfer. 
