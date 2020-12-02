@@ -1,6 +1,6 @@
 # Concurrent File Transfer
  A concurrent file transfer app. <br/>
- The goal of this project is to create a multi-threaded version of "rsync".
+ The goal of this project is to create a multi-threaded version of "scp".
  
  Transfer validation is achieved by calculating MD5 checksum before and after transfer. 
  
